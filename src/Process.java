@@ -1,5 +1,3 @@
-package mtoslab2;
-
 import java.util.*;
 
 // Class for a process
@@ -60,13 +58,13 @@ public class Process {
 	}
 
 	// Sets the process to ready
-	public void setReady() {
+	public void setReady() throws SchedulingException {
 		if (this.state != 0 || this.state != 3) throw new SchedulingException("Attempted to set process to ready from an incompatible state.");
 		this.state = 1;
 	}
 
 	// Sets the process to run
-	public void setToRun(int cpuBurst) {
+	public void setToRun(int cpuBurst) throws SchedulingException {
 		if (this.state != 1) throw new SchedulingException("Attempted to run non-ready process.");
 		this.state = 2;
 
@@ -75,18 +73,18 @@ public class Process {
 		this.burstLeft = cpuBurst;
 	}
 
-	public void setTerminate() {
+	public void setTerminate() throws SchedulingException {
 		if (this.timeLeft > 0) throw new SchedulingException("Process terminated before completion.");
 		this.state = 4;
 	}
 
-	public void setBlocked() {
+	public void setBlocked() throws SchedulingException {
 		if (this.state != 2) throw new SchedulingException("Attempted to block non-running process.");
 		this.state = 3;
 		this.blockLeft = this.burstTotal * this.M;
 	}
 
-	public void tick() {
+	public void tick() throws SchedulingException {
 		switch (state) {
 			// Unstarted State - Do nothing
 			case 0: break;
@@ -108,16 +106,15 @@ public class Process {
 					break;
 
 			default: throw new SchedulingException("State unknown.");
-					break;
 		}
 	}
 
-	private void handleReadyTick() {
+	private void handleReadyTick() throws SchedulingException {
 		if (state!=1) throw new SchedulingException("handleReadyTick() invoked when not in ready state.");
 		waitTime++;
 	}
 
-	private void handleRunTick() {
+	private void handleRunTick() throws SchedulingException {
 		if (state!=2) throw new SchedulingException("handleRunTick() invoked when not in ready state.");
 
 		if (burstLeft >= 0) {
@@ -137,7 +134,7 @@ public class Process {
 		}
 	}
 
-	private void handleBlockTick() {
+	private void handleBlockTick() throws SchedulingException {
 		if (state!=3) throw new SchedulingException("handleBlockTick() invoked when not in blocked state.");
 
 		if (blockLeft >= 0) {
@@ -155,5 +152,11 @@ public class Process {
 	// Essentially does nothing
 	private void handleTerminationTick() {
 		return;
+	}
+
+	public String toString() {
+		String s = "";
+		s += "A: " + this.A + "\t| B: " + this.B + "\t| C: " + this.C + "\t| M: " + this.M;
+		return s;
 	}
 }

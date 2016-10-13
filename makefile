@@ -3,7 +3,7 @@
 ###################################################
 
 # main program to run
-main=lab2
+main=Lab2
 
 # default command line arguments
 args=1111 16 2

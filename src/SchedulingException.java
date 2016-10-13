@@ -1,4 +1,4 @@
-package mtoslab2;
+// package mtoslab2;
 
 class SchedulingException extends Exception {
 	// No parameter constructor

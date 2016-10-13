@@ -1,2 +1,33 @@
 Michael Tan Lab02 Operating Systems Fall 2016
 Gottlieb
+
+METHOD: Accept a command line argument giving the name of the input file
+
+Folder: mlt365-lab02
+	|-contains
+		|- src - folder containing .java files
+		|- bin - folder that contains the compiled .java files
+		|- input - contains input-#.txt as well as random-numbers
+		|- README
+		|- makefile - for compilation running and management. Instructions below
+
+# Usage:
+# 	From any terminal:
+#
+# 	> cd mlt365-lab02
+#
+# 	> make 			-- this will compile all the Java programs in src.
+# 				   Note that all the .class files will be put
+# 				   in a folder called "bin".  If bin does not
+# 				   exist, it will first create bin.
+# 	> make run		-- this will run the main program: (Avoid! There MUST be an argument for textfile name)
+# 	> make run args="file_path.txt"
+# 				-- this will run the main program 
+# 				   with the indicated command line arguments
+#				-- the args indication the file name should be "file_path/file_name.txt"
+#				-- i.e if input-4.txt is in jd2774-lab01 -> 'make run args="input-4.txt" '
+#				-- i.e if it's in a folder in jd2774-lab01 called data -> 'make run args="data/input-4.txt"'
+#	> make clean		-- removes any compiled programs (cleans bin folder)
+#	> make zip		-- creates the zip file jd2774-lab01.zip for submission
+#				   (the zip file will be found in the parent folder,
+#				   i.e., "..")
