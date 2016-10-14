@@ -2,6 +2,8 @@ import java.util.*;
 
 // Class for a process
 public class Process {
+	int id;
+
 	// A - Arrival time
 	// B - The inclusive limit of a random cpu burst
 	// C - Total CPU time needed
@@ -21,7 +23,7 @@ public class Process {
 	// Keep track of total wait time (time in Ready state)
 	int waitTime;
 
-	// This is equal to C + ioTime + waitTime
+	// This is equal to C + ioTime + waitTime + A
 	int finishTime;
 
 	// This is equal to finishTime - A
@@ -40,6 +42,9 @@ public class Process {
 	// Tracks how much longer process has in cpuBurst
 	int burstLeft;
 
+	int quantumMax;
+	int quantumCurr;
+
 	public Process(int A, int B, int C, int M) {
 		this.A = A;
 		this.B = B;
@@ -55,31 +60,50 @@ public class Process {
 		this.burstLeft = 0;
 		// Set state to unstarted
 		this.state = 0;
+		this.quantumMax = 0;
+		this.quantumCurr = 0;
+	}
+
+	public void setQuantumMax(int quantum) {
+		this.quantumMax = quantum;
+	}
+
+	public int getQuantumMax() { return this.quantumMax; }
+	public int getQuantumCurr() { return this.quantumCurr; }
+
+	public int getState() {
+		return state;
 	}
 
 	// Sets the process to ready
 	public void setReady() throws SchedulingException {
-		if (this.state != 0 || this.state != 3) throw new SchedulingException("Attempted to set process to ready from an incompatible state.");
+		if (this.state != 0 && this.state != 3) throw new SchedulingException("Attempted to set process to ready from an incompatible state: " + this.state);
 		this.state = 1;
 	}
 
 	// Sets the process to run
 	public void setToRun(int cpuBurst) throws SchedulingException {
-		if (this.state != 1) throw new SchedulingException("Attempted to run non-ready process.");
+		// if (this.blockLeft > 0) throw new SchedulingException("Attempted to run non-ready process.");
 		this.state = 2;
 
-		// Sets the burst time for the process
-		this.burstTotal = cpuBurst;
-		this.burstLeft = cpuBurst;
+		// Only reset the burst if the process's burst has finished
+		// Reason: Could be interrupted by RR quantum burst
+		if(this.burstLeft <= 0) {
+			// Sets the burst time for the process
+			this.burstTotal = cpuBurst;
+			this.burstLeft = cpuBurst;
+		}
 	}
 
 	public void setTerminate() throws SchedulingException {
 		if (this.timeLeft > 0) throw new SchedulingException("Process terminated before completion.");
+		// System.out.println("Set terminate called.");
 		this.state = 4;
 	}
 
 	public void setBlocked() throws SchedulingException {
 		if (this.state != 2) throw new SchedulingException("Attempted to block non-running process.");
+		// System.out.println("Set blocked called.");
 		this.state = 3;
 		this.blockLeft = this.burstTotal * this.M;
 	}
@@ -117,6 +141,7 @@ public class Process {
 	private void handleRunTick() throws SchedulingException {
 		if (state!=2) throw new SchedulingException("handleRunTick() invoked when not in ready state.");
 
+		// System.out.println("Running: Burst Left: " + burstLeft + " | Time Left: " + timeLeft);
 		if (burstLeft >= 0) {
 			timeLeft--;
 			burstLeft--;
@@ -132,9 +157,17 @@ public class Process {
 			setBlocked();
 			return;
 		}
+
+		// Set state to ready if quantum has been reached
+		else if (quantumMax > 0 && burstTotal != burstLeft && (burstTotal - burstLeft)%quantumMax==0) {
+			System.out.println("Quantum has been reached, setting to ready.");
+			setReady();
+			return;
+		}
 	}
 
 	private void handleBlockTick() throws SchedulingException {
+		// System.out.println("Handle block tick called with blockLEft: " + blockLeft);
 		if (state!=3) throw new SchedulingException("handleBlockTick() invoked when not in blocked state.");
 
 		if (blockLeft >= 0) {
@@ -144,6 +177,7 @@ public class Process {
 
 		// Set state to ready if process has finished I/O
 		if (blockLeft <= 0) {
+			// System.out.println("Block is complete, setting to ready.");
 			setReady();
 			return;
 		}
@@ -159,4 +193,36 @@ public class Process {
 		s += "A: " + this.A + "\t| B: " + this.B + "\t| C: " + this.C + "\t| M: " + this.M;
 		return s;
 	}
+
+	public String results() {
+		// System.out.format("Process %d Finish time: this.c(%d) + ioTime(%d) + waitTime(%d) = %d\n", this.id, this.C, ioTime, waitTime, this.C + ioTime + waitTime);
+		finishTime = this.C + ioTime + waitTime + this.A;
+		turnaroundTime = finishTime - A;
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("        ");
+		sb.append(String.format("(A, B, C, M) = (%d, %d, %d, %d)", this.A, this.B, this.C, this.M));
+		sb.append("\n        ");
+		sb.append("Finishing time: " + finishTime);
+		sb.append("\n        ");
+		sb.append("Turnaround time: " + turnaroundTime);
+		sb.append("\n        ");
+		sb.append("I/O time: " + ioTime);
+		sb.append("\n        ");
+		sb.append("Waiting time: " + waitTime);
+		return sb.toString();
+	}
+
+	public int getA() { return this.A; }
+	public int getB() { return this.B; }
+	public int getC() { return this.C; }
+	public int getM() { return this.M; }
+	public int getBlockLeft() { return this.blockLeft; }
+	public int getBurstLeft() { return this.burstLeft; }
+	public int getWaitTime() { return this.waitTime; }
+	public int getFinishTime() { return this.finishTime; }
+	public int getIoTime() { return this.ioTime; }
+	public int getTurnaroundTime() { return this.turnaroundTime; }
+	public void setId(int id) { this.id = id; }
+	public int getId() { return this.id; }
 }
