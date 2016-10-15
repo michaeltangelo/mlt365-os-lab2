@@ -80,8 +80,11 @@ class Lab2 {
 		}
 
 		ArrayList<Process> allProcesses = createProcesses();
-		// Do FCFS
-		FCFS s1 = new FCFS(verbose, allProcesses);
-		runScheduler(s1);
+
+		// FCFS s1 = new FCFS(verbose, allProcesses);
+		// runScheduler(s1);
+
+		RoundRobin s2 = new RoundRobin(verbose, allProcesses, 2);
+		runScheduler(s2);
 	}
 }

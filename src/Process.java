@@ -42,8 +42,10 @@ public class Process {
 	// Tracks how much longer process has in cpuBurst
 	int burstLeft;
 
+	// Tracks how many bursts have occured before a block
+	int burstCount;
+
 	int quantumMax;
-	int quantumCurr;
 
 	public Process(int A, int B, int C, int M) {
 		this.A = A;
@@ -60,8 +62,7 @@ public class Process {
 		this.burstLeft = 0;
 		// Set state to unstarted
 		this.state = 0;
-		this.quantumMax = 0;
-		this.quantumCurr = 0;
+		this.quantumMax = 1000;
 	}
 
 	public void setQuantumMax(int quantum) {
@@ -69,7 +70,6 @@ public class Process {
 	}
 
 	public int getQuantumMax() { return this.quantumMax; }
-	public int getQuantumCurr() { return this.quantumCurr; }
 
 	public int getState() {
 		return state;
@@ -77,7 +77,7 @@ public class Process {
 
 	// Sets the process to ready
 	public void setReady() throws SchedulingException {
-		if (this.state != 0 && this.state != 3) throw new SchedulingException("Attempted to set process to ready from an incompatible state: " + this.state);
+		if (this.state == 4) throw new SchedulingException("Attempted to set process to ready from an incompatible state: " + this.state);
 		this.state = 1;
 	}
 
@@ -160,7 +160,7 @@ public class Process {
 
 		// Set state to ready if quantum has been reached
 		else if (quantumMax > 0 && burstTotal != burstLeft && (burstTotal - burstLeft)%quantumMax==0) {
-			System.out.println("Quantum has been reached, setting to ready.");
+			// System.out.println("Quantum has been reached, setting to ready.");
 			setReady();
 			return;
 		}

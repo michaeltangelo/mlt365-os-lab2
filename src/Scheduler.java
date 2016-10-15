@@ -23,6 +23,7 @@ public abstract class Scheduler {
 	protected LinkedList<Process> blockedList;
 	protected ArrayList<Process> terminated;
 	protected Comparator<Process> comparator;
+	protected int quantum;
 
 	private int totalIoBlockCycles;
 
@@ -42,6 +43,7 @@ public abstract class Scheduler {
 		this.blockedList = new LinkedList<Process>();
 		this.terminated = new ArrayList<Process>();
 		this.totalIoBlockCycles = 0;
+		this.quantum = 99999;
 	}
 
 	protected static String processStringFromList(int numProcesses, ArrayList<Process> list) {
@@ -93,7 +95,11 @@ public abstract class Scheduler {
 			*/
 			// Run the next ready process
 			Process p = readyQueue.removeLast();
-			p.setToRun(randomOS(p.getB()));
+			if (cycleNum == 17) { 
+				int random = randomOS(p.getB());
+				p.setToRun(random);
+			}
+			else p.setToRun(randomOS(p.getB()));
 		}
 	}
 
@@ -182,6 +188,7 @@ public abstract class Scheduler {
 							burst = "0";
 							break;
 				case 2:		stateName = "running";
+							// burst = String.valueOf(quantum-(p.getBurstLeft()%quantum));
 							burst = String.valueOf(p.getBurstLeft());
 							break;
 				case 3:		stateName = "blocked";
