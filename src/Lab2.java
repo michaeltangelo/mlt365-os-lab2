@@ -6,6 +6,7 @@ class Lab2 {
 	private static int numProcs;
 	private static List<String> processList;
 	private static String originalInput;
+	private static ArrayList<Process> allProcesses;
 
 	// Sets verbose boolean and reads in input from args
 	private static boolean init(String[] args) {
@@ -58,6 +59,39 @@ class Lab2 {
 		return allProcesses;
 	}
 
+	public static void createAndRunScheduler(String scheduler) throws SchedulingException {
+		switch (scheduler) {
+			case "First Come First Serve":
+			case "FCFS":	System.out.print("\n=====================\n\n");
+							allProcesses = createProcesses();
+							FCFS s1 = new FCFS(verbose, allProcesses);
+							runScheduler(s1);
+							break;
+			case "Round Robin":				
+			case "RR":							
+							System.out.print("\n=====================\n\n");
+							allProcesses = createProcesses();
+							RoundRobin s2 = new RoundRobin(verbose, allProcesses, 2);
+							runScheduler(s2);
+							break;
+			case "Uniprocessing":			
+							System.out.print("\n=====================\n\n");
+							allProcesses = createProcesses();
+							Uniprogrammed s3 = new Uniprogrammed(verbose, allProcesses);
+							runScheduler(s3);
+							break;
+			case "Shortest Job First":		
+			case "SJF":
+							System.out.print("\n=====================\n\n");
+							allProcesses = createProcesses();
+							SJF s4 = new SJF(verbose, allProcesses, 1000);
+							runScheduler(s4);
+							break;
+			default: System.out.println("UNKNOWN SCHEDULER. Ending Program.");
+					return;
+		}
+	}
+
 	public static void runScheduler(Scheduler s) throws SchedulingException {
 		/*
 		for (int i = 0; i < 10; i++) {
@@ -79,12 +113,23 @@ class Lab2 {
 			return;
 		}
 
-		ArrayList<Process> allProcesses = createProcesses();
+		createAndRunScheduler("FCFS");
+		createAndRunScheduler("RR");
+		createAndRunScheduler("Uniprocessing");
+		createAndRunScheduler("SJF");
 
-		// FCFS s1 = new FCFS(verbose, allProcesses);
-		// runScheduler(s1);
+		// allProcesses = createProcesses();
+		// RoundRobin s2 = new RoundRobin(verbose, allProcesses, 2);
+		// runScheduler(s2);
+		// System.out.print("\n=====================\n\n");
 
-		RoundRobin s2 = new RoundRobin(verbose, allProcesses, 2);
-		runScheduler(s2);
+		// allProcesses = createProcesses();
+		// Uniprogrammed s3 = new Uniprogrammed(verbose, allProcesses);
+		// runScheduler(s3);
+		// System.out.print("\n=====================\n\n");
+
+		// allProcesses = createProcesses();
+		// SJF s4 = new SJF(verbose, allProcesses, 1000);
+		// runScheduler(s4);
 	}
 }

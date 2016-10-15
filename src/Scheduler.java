@@ -66,10 +66,19 @@ public abstract class Scheduler {
 
 	// Simulates one cpu cycle
 	public void cycle() throws SchedulingException {
+		// stall(40);
 		if(verbose) preCyclePrint();
 		tickProcesses();
 		prepNextTick();
 		cycleNum++;
+	}
+
+	public void stall(int stallCycle) {
+		if (cycleNum == stallCycle) {
+			System.out.println("STALLING ON PURPOSE!");
+			while (true) {
+			}
+		}
 	}
 
 	protected void tickProcesses() throws SchedulingException {
@@ -82,24 +91,26 @@ public abstract class Scheduler {
 	// Prepares for tickProcesses() call by setting the correct state for all processes
 	public void prepNextTick() throws SchedulingException {
 		readyAllUnstarted();
+		// printBlockedList();
 		// Maintain the queue of ready processes
 		maintainReadyQueue();
 		// printLinkedList(readyQueue);
 
 		if (noProcessRunning && !readyQueue.isEmpty()) {
-			/*
-			System.out.print("Ready queue: ");
-			for (Process p : readyQueue) {
-				System.out.print(p.getId() + " ");
-			}
-			*/
-			// Run the next ready process
 			Process p = readyQueue.removeLast();
 			if (cycleNum == 17) { 
 				int random = randomOS(p.getB());
 				p.setToRun(random);
 			}
-			else p.setToRun(randomOS(p.getB()));
+			else {
+				if (p.burstLeft>0) {
+					p.setToRun();
+				}
+				else {
+					int random = randomOS(p.getB());
+					p.setToRun(random);
+				}
+			}
 		}
 	}
 
@@ -173,6 +184,14 @@ public abstract class Scheduler {
 		return processes;
 	}
 
+	public void printBlockedList() {
+		System.out.print("blocked list: ");
+		for (Process p : blockedList) {
+			System.out.print(p.getId() + " ");
+		}
+		System.out.println();
+	}
+
 	private void preCyclePrint() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format("Before cycle %4s:", cycleNum));
@@ -218,7 +237,11 @@ public abstract class Scheduler {
 	}
 
 	public int randomOS(int B) {
-		return 1 + (Integer.parseInt(random.nextLine()) % B);
+		String next = random.nextLine();
+		if (verbose) {
+			System.out.println("Find burst when choosing next process to run: " + next + " / " + B + "= " + (Integer.parseInt(next) % B));
+		}
+		return 1 + (Integer.parseInt(next) % B);
 	}
 
 	public void run() {

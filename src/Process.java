@@ -65,6 +65,9 @@ public class Process {
 		this.quantumMax = 1000;
 	}
 
+	public void setTimeLeft(int timeLeft) {
+		this.timeLeft = timeLeft;
+	}
 	public void setQuantumMax(int quantum) {
 		this.quantumMax = quantum;
 	}
@@ -83,7 +86,7 @@ public class Process {
 
 	// Sets the process to run
 	public void setToRun(int cpuBurst) throws SchedulingException {
-		// if (this.blockLeft > 0) throw new SchedulingException("Attempted to run non-ready process.");
+		if (this.blockLeft > 0) throw new SchedulingException("Attempted to run a process that still has blockTime.");
 		this.state = 2;
 
 		// Only reset the burst if the process's burst has finished
@@ -93,6 +96,12 @@ public class Process {
 			this.burstTotal = cpuBurst;
 			this.burstLeft = cpuBurst;
 		}
+	}
+
+	// Sets the process to run without a cpuBurst
+	public void setToRun() throws SchedulingException {
+		if (this.blockLeft > 0) throw new SchedulingException("Attempted to run a process that still has blockTime.");
+		this.state = 2;
 	}
 
 	public void setTerminate() throws SchedulingException {
@@ -160,7 +169,6 @@ public class Process {
 
 		// Set state to ready if quantum has been reached
 		else if (quantumMax > 0 && burstTotal != burstLeft && (burstTotal - burstLeft)%quantumMax==0) {
-			// System.out.println("Quantum has been reached, setting to ready.");
 			setReady();
 			return;
 		}
